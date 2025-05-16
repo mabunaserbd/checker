@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="warpcast-miniapp" content="v0.0.1" />
+  <title>Farcaster Insight (Free)</title>
+  <style>
+    body { font-family: sans-serif; background: #0f172a; color: white; padding: 40px; text-align: center; }
+    .container { max-width: 500px; margin: auto; background: #1e293b; padding: 20px; border-radius: 12px; }
+    input, button { padding: 10px; margin-top: 10px; border-radius: 8px; border: none; }
+    input { width: 80%; font-size: 1rem; }
+    button { background: #3b82f6; color: white; cursor: pointer; }
+    button:hover { background: #2563eb; }
+    .data { text-align: left; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Farcaster Insight</h1>
+    <p>Enter your Warpcast username (no @ needed):</p>
+    <input id="username" placeholder="e.g. dwr" />
+    <br/>
+    <button onclick="checkUser()">Check My Score</button>
+
+    <div class="data" id="results" style="display:none;">
+      <h2>User Info</h2>
+      <p><strong>Username:</strong> <span id="name"></span></p>
+      <p><strong>FID:</strong> <span id="fid"></span></p>
+      <p><strong>Neynar Score:</strong> <span id="score"></span></p>
+
+      <h2>Spam Risk</h2>
+      <p><strong>Flagged Casts:</strong> <span id="spam"></span></p>
+
+      <h2>Airdrop</h2>
+      <p><strong>Eligible:</strong> <span id="airdrop"></span></p>
+    </div>
+  </div>
+
+  <script>
+    const apiKey = "YOUR_FREE_API_KEY"; // get from neynar.com
+
+    async function checkUser() {
+      const username = document.getElementById("username").value.trim();
+      if (!username) return alert("Please enter a username.");
+
+      try {
+        const res = await fetch(`https://api.neynar.com/v1/farcaster/user-by-username?username=${username}`, {
+          headers: { "api_key": apiKey }
+        });
+
+        const data = await res.json();
+        if (!data.result) return alert("User not found.");
+
+        const user = data.result.user;
+        document.getElementById("name").textContent = user.username;
+        document.getElementById("fid").textContent = user.fid;
+        document.getElementById("score").textContent = user.reputation.score ?? "N/A";
+
+        // Fake data: You can replace this with smarter checks later
+        const flagged = Math.floor(Math.random() * 3);
+        const eligible = user.reputation.score >= 80 ? "✅ Yes" : "❌ No";
+
+        document.getElementById("spam").textContent = `${flagged} casts flagged`;
+        document.getElementById("airdrop").textContent = eligible;
+        document.getElementById("results").style.display = "block";
+      } catch (e) {
+        alert("Error fetching user info.");
+        console.error(e);
+      }
+    }
+  </script>
+</body>
+</html>
